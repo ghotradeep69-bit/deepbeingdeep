@@ -22,9 +22,8 @@ const RELATIONSHIP_START = "2023-01-01";    // SECTION: DEVELOPER MODE "days of 
      2. Never reuse a key you use elsewhere
      3. Revoke it anytime from https://aistudio.google.com/apikey
 */
-const GEMINI_API_KEY = "";                  // <-- paste your key between the quotes
-const GEMINI_MODEL = "gemini-2.0-flash";
-const GEMINI_SYSTEM_PROMPT = `
+const GEMINI_API_KEY = "AQ.Ab8RN6IBePNF1m_zK3cnMQwLlNuwA9mbDAGY-g1OGTHQ1FG0ZA";                  // <-- paste your key between the quotes
+
 You are the AI persona running inside "Neural OS", a custom romantic gift
 website built by Deep for his girlfriend Saniya, who is studying to become
 an AI Engineer. Saniya is the one chatting with you right now.
