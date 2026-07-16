@@ -22,7 +22,7 @@ const RELATIONSHIP_START = "2023-01-01";    // SECTION: DEVELOPER MODE "days of 
      2. Never reuse a key you use elsewhere
      3. Revoke it anytime from https://aistudio.google.com/apikey
 */
-const GEMINI_API_KEY = "AQ.Ab8RN6LZBCyYB7A3qTYWzr4B2z1UZPAKn-gOj4naTd9hbQ01Qw";                  // <-- paste your key between the quotes
+const GEMINI_API_KEY = "AQ.Ab8RN6LaFR22l9TfIXxeu3T4AzHW5FjByw3U4RJGam9A8kDOsw";                  // <-- paste your key between the quotes
 const GEMINI_MODEL = "gemini-2.5-flash";
 const GEMINI_SYSTEM_PROMPT = `
 You are the AI persona running inside "Neural OS", a custom romantic gift
