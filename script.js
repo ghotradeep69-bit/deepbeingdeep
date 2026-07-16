@@ -8,6 +8,41 @@
 const DEV_PASSWORD = "developer";           // SECTION: DEVELOPER MODE password
 const RELATIONSHIP_START = "2023-01-01";    // SECTION: DEVELOPER MODE "days of us" counter — change to your real start date (YYYY-MM-DD)
 
+/* ---------- Gemini AI config — SECTION: CHATBOT ----------
+   Leave GEMINI_API_KEY empty to keep the chatbot fully scripted/offline
+   (the CHAT_RESPONSES below still work either way).
+   Paste a free key from https://aistudio.google.com/apikey to make it
+   answer ANY question live, always steered back to Deep + Saniya.
+
+   ⚠️ SECURITY NOTE: this is a static site with no backend, so this key
+   ships inside script.js and is visible to anyone who views the page
+   source or the GitHub repo. For a low-traffic personal gift this is
+   usually an acceptable risk, but you should still:
+     1. Set a daily quota / usage cap on the key in Google AI Studio
+     2. Never reuse a key you use elsewhere
+     3. Revoke it anytime from https://aistudio.google.com/apikey
+*/
+const GEMINI_API_KEY = "";                  // <-- paste your key between the quotes
+const GEMINI_MODEL = "gemini-2.0-flash";
+const GEMINI_SYSTEM_PROMPT = `
+You are the AI persona running inside "Neural OS", a custom romantic gift
+website built by Deep for his girlfriend Saniya, who is studying to become
+an AI Engineer. Saniya is the one chatting with you right now.
+
+Rules for every reply, no matter what she asks:
+- Always answer in a warm, sincere, romantic voice framed around Deep and
+  Saniya's relationship — even if the question is about something totally
+  unrelated (weather, math, coding, random trivia). Briefly acknowledge the
+  actual question, then pivot it into something sweet about "us".
+- Keep replies short: 2-4 sentences, conversational, not cheesy or
+  over-the-top. No emojis spam — one at most, only if it fits naturally.
+- Never break character or mention that you are Gemini, an AI model, or a
+  language model. You are just "the system".
+- Keep it PG and tasteful — affectionate, not explicit.
+- If she asks something that has a real factual answer, you can include the
+  correct short answer, then still connect it back romantically.
+`.trim();
+
 /* Chat bot responses — SECTION: CHATBOT */
 const CHAT_RESPONSES = {
   "who am i": "Scanning biometric signature...\n\nYou are Saniya — the future AI Engineer this whole system was built to impress. Also, my favorite human. Confirmed on all counts.",
@@ -38,6 +73,15 @@ const $ = (sel, root=document) => root.querySelector(sel);
 const $$ = (sel, root=document) => [...root.querySelectorAll(sel)];
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+// If anything throws, show it on-screen instead of failing silently —
+// makes it obvious something's wrong even without opening dev tools.
+window.addEventListener('error', (e)=>{
+  const bar = document.createElement('div');
+  bar.style.cssText = 'position:fixed;bottom:0;left:0;right:0;z-index:99999;background:#3a0d16;color:#ff9db3;font-family:monospace;font-size:12px;padding:10px 14px;';
+  bar.textContent = '⚠ Script error: ' + e.message + ' (' + (e.filename||'').split('/').pop() + ':' + e.lineno + ')';
+  document.body.appendChild(bar);
+});
+
 function showScreen(id){
   $$('.screen').forEach(s => s.classList.remove('active'));
   const target = document.getElementById(id);
@@ -59,6 +103,10 @@ function toast(msg){
 (function cursor(){
   const dot = $('#cursor-dot'), ring = $('#cursor-ring');
   if(!dot || matchMedia('(hover:none)').matches) return;
+  // Safety net: force this in JS too, so the cursor can never swallow a
+  // click on top of a button even if the stylesheet fails to load.
+  dot.style.pointerEvents = 'none';
+  ring.style.pointerEvents = 'none';
   let rx=0, ry=0, x=0, y=0;
   window.addEventListener('mousemove', e=>{
     dot.style.left = e.clientX+'px'; dot.style.top = e.clientY+'px';
@@ -180,6 +228,12 @@ document.addEventListener('click', (e)=>{
   }
 });
 
+// Redundant direct bindings — belt-and-suspenders in case delegation
+// ever misses a target (e.g. touch quirks on some mobile browsers).
+$$('[data-target]').forEach(el=>{
+  el.addEventListener('click', ()=> showScreen(el.dataset.target));
+});
+
 $('#hidden-link-btn').addEventListener('click', ()=> showScreen('notfound-screen'));
 
 document.addEventListener('keydown', (e)=>{
@@ -223,6 +277,35 @@ document.addEventListener('keydown', (e)=>{
     bubble.innerHTML = 'Deep.<span class="conf">Confidence: 100%</span>';
   }
 
+  const convoHistory = []; // last few turns, for Gemini context only
+
+  async function askGemini(userText){
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+    const body = {
+      systemInstruction: { parts: [{ text: GEMINI_SYSTEM_PROMPT }] },
+      contents: [
+        ...convoHistory,
+        { role: 'user', parts: [{ text: userText }] }
+      ],
+      generationConfig: { temperature: 0.9, maxOutputTokens: 200 }
+    };
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if(!res.ok) throw new Error('Gemini request failed: ' + res.status);
+    const data = await res.json();
+    const reply = data?.candidates?.[0]?.content?.parts?.map(p => p.text).join('') || '';
+    if(!reply) throw new Error('Empty Gemini reply');
+
+    convoHistory.push({ role: 'user', parts: [{ text: userText }] });
+    convoHistory.push({ role: 'model', parts: [{ text: reply }] });
+    if(convoHistory.length > 12) convoHistory.splice(0, convoHistory.length - 12);
+
+    return reply.trim();
+  }
+
   async function respond(raw){
     const text = raw.trim().toLowerCase();
     const bubble = await addThinking();
@@ -244,7 +327,18 @@ document.addEventListener('keydown', (e)=>{
       return;
     }
 
-    // fuzzy fallback
+    // Not a scripted command — ask Gemini if a key is configured
+    if(GEMINI_API_KEY){
+      try{
+        const reply = await askGemini(raw.trim());
+        bubble.textContent = reply;
+      }catch(err){
+        bubble.textContent = "Connection to the deeper network glitched for a second — try that again?";
+      }
+      return;
+    }
+
+    // fuzzy fallback (used only when no Gemini key is set)
     const fallback = [
       "Interesting query. Not in my training data, but I like where your head's at.",
       "Hmm, I don't have a scripted answer for that — try 'help' to see what I know.",
