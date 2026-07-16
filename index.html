@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NEURAL OS // DeepAI Interface</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Custom cursor -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- Ambient particle canvas (lives behind everything) -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ===================== BOOT SCREEN ===================== -->
+<section id="boot-screen" class="screen active">
+  <div class="boot-scan"></div>
+  <div class="boot-box">
+    <div class="boot-title">NEURAL&nbsp;OS <span class="boot-version">v3.2</span></div>
+    <div id="boot-log" class="boot-log" aria-live="polite"></div>
+    <div class="boot-bar-wrap">
+      <div id="boot-bar" class="boot-bar"></div>
+    </div>
+    <div id="boot-percent" class="boot-percent">0%</div>
+  </div>
+</section>
+
+<!-- ===================== HOME / DASHBOARD ===================== -->
+<section id="home-screen" class="screen">
+  <div class="glow-orb orb-a"></div>
+  <div class="glow-orb orb-b"></div>
+
+  <header class="topbar">
+    <div class="topbar-id">
+      <span class="pulse-dot"></span> SYSTEM ONLINE
+    </div>
+    <div class="topbar-clock" id="clock">00:00:00</div>
+  </header>
+
+  <div class="home-content">
+    <p class="eyebrow">NEURAL&nbsp;INTERFACE&nbsp;/&nbsp;BUILD&nbsp;3.2</p>
+    <h1 id="home-title" class="home-title" title="click me">DeepAI Neural Interface</h1>
+    <p class="home-subtitle">Welcome, Saniya. Future AI Engineer.</p>
+
+    <nav class="menu-grid">
+      <button class="menu-btn" data-target="chat-screen">
+        <span class="menu-icon">◈</span>
+        <span class="menu-label">Start AI</span>
+        <span class="menu-desc">Talk to the system</span>
+      </button>
+      <button class="menu-btn" data-target="memories-screen">
+        <span class="menu-icon">◇</span>
+        <span class="menu-label">Memories</span>
+        <span class="menu-desc">Timeline of us</span>
+      </button>
+      <button class="menu-btn" data-target="projects-screen">
+        <span class="menu-icon">◆</span>
+        <span class="menu-label">Projects</span>
+        <span class="menu-desc">In active development</span>
+      </button>
+      <button class="menu-btn" data-target="terminal-screen">
+        <span class="menu-icon">▹</span>
+        <span class="menu-label">Terminal</span>
+        <span class="menu-desc">Raw system access</span>
+      </button>
+      <button class="menu-btn" id="dev-mode-btn">
+        <span class="menu-icon">⌘</span>
+        <span class="menu-label">Developer Mode</span>
+        <span class="menu-desc">Restricted</span>
+      </button>
+      <button class="menu-btn" id="hidden-link-btn">
+        <span class="menu-icon">⚠</span>
+        <span class="menu-label">Hidden Link</span>
+        <span class="menu-desc">Do not click</span>
+      </button>
+      <button class="menu-btn menu-btn-danger" id="shutdown-btn">
+        <span class="menu-icon">⏻</span>
+        <span class="menu-label">Shutdown</span>
+        <span class="menu-desc">Terminate session</span>
+      </button>
+    </nav>
+  </div>
+
+  <footer class="home-footer">Press <kbd>H</kbd> anytime to return here &nbsp;•&nbsp; Some things are hidden. Look closer.</footer>
+</section>
+
+<!-- ===================== CHAT / START AI ===================== -->
+<section id="chat-screen" class="screen">
+  <header class="sub-topbar">
+    <button class="back-btn" data-target="home-screen">← Home</button>
+    <div class="sub-title">START AI <span class="tag">v3.2</span></div>
+    <div></div>
+  </header>
+
+  <div class="chat-wrap">
+    <div id="chat-log" class="chat-log"></div>
+    <form id="chat-form" class="chat-form">
+      <span class="chat-prompt">&gt;</span>
+      <input id="chat-input" type="text" autocomplete="off" placeholder="Ask me anything... try 'help'" />
+      <button type="submit" class="chat-send">Send</button>
+    </form>
+    <div class="chat-hints">Try: <em>who am i</em> · <em>future</em> · <em>motivate me</em> · <em>coffee</em> · <em>hug</em> · <em>who loves me</em> · <em>favorite memory</em> · <em>tell me a joke</em> · <em>help</em></div>
+  </div>
+</section>
+
+<!-- ===================== LOVE SEQUENCE (cinematic overlay) ===================== -->
+<section id="love-sequence" class="screen love-screen">
+  <div id="love-particles" class="love-particles"></div>
+  <div id="love-hearts" class="love-hearts"></div>
+  <div id="love-photos" class="love-photos"></div>
+  <div id="love-final" class="love-final">
+    <div class="love-photo-frame">
+      <img id="love-final-photo" src="" alt="">
+      <div id="love-no-photos" class="love-no-photos">Add photos to <code>/images</code> to see them here</div>
+    </div>
+    <p class="love-line">I analyzed millions of possibilities.</p>
+    <p class="love-line love-line-2">You're still my favorite one.</p>
+    <button id="love-continue" class="glow-btn">Continue</button>
+  </div>
+</section>
+
+<!-- ===================== MEMORIES ===================== -->
+<section id="memories-screen" class="screen">
+  <header class="sub-topbar">
+    <button class="back-btn" data-target="home-screen">← Home</button>
+    <div class="sub-title">MEMORY BANK <span class="tag">timeline</span></div>
+    <div></div>
+  </header>
+  <div class="memories-wrap">
+    <div id="timeline" class="timeline"></div>
+  </div>
+</section>
+
+<!-- ===================== PROJECTS ===================== -->
+<section id="projects-screen" class="screen">
+  <header class="sub-topbar">
+    <button class="back-btn" data-target="home-screen">← Home</button>
+    <div class="sub-title">ACTIVE PROJECTS <span class="tag">4 repositories</span></div>
+    <div></div>
+  </header>
+  <div class="projects-wrap" id="projects-wrap"></div>
+</section>
+
+<!-- ===================== TERMINAL ===================== -->
+<section id="terminal-screen" class="screen">
+  <header class="sub-topbar">
+    <button class="back-btn" data-target="home-screen">← Home</button>
+    <div class="sub-title">/dev/heart <span class="tag">bash</span></div>
+    <div></div>
+  </header>
+  <div class="terminal-wrap">
+    <div class="terminal-window">
+      <div class="terminal-chrome">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span class="terminal-path">deep@neural-os: ~</span>
+      </div>
+      <div id="terminal-body" class="terminal-body"></div>
+      <div class="terminal-input-line">
+        <span class="terminal-prompt">deep@neural-os:~$</span>
+        <input id="terminal-input" type="text" autocomplete="off" spellcheck="false" />
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== DEVELOPER MODE ===================== -->
+<section id="dev-screen" class="screen">
+  <header class="sub-topbar">
+    <button class="back-btn" data-target="home-screen">← Home</button>
+    <div class="sub-title">DEVELOPER MODE <span class="tag">restricted</span></div>
+    <div></div>
+  </header>
+  <div class="dev-wrap">
+    <div id="dev-lock" class="dev-lock">
+      <p class="dev-lock-icon">🔒</p>
+      <p class="dev-lock-text">Enter access password</p>
+      <form id="dev-form" class="dev-form">
+        <input id="dev-password" type="password" autocomplete="off" placeholder="••••••••" />
+        <button type="submit" class="glow-btn">Unlock</button>
+      </form>
+      <p id="dev-error" class="dev-error"></p>
+    </div>
+    <div id="dev-content" class="dev-content hidden">
+      <h2 class="dev-heading">ACCESS GRANTED</h2>
+      <div class="dev-note">
+        <p class="dev-note-label">Developer Notes</p>
+        <p class="dev-note-text">"Building this website was easier than finding someone as amazing as you."</p>
+      </div>
+      <div class="dev-stats">
+        <div class="dev-stat"><span class="dev-stat-num" id="stat-days">—</span><span class="dev-stat-label">days of &quot;us&quot;</span></div>
+        <div class="dev-stat"><span class="dev-stat-num">∞</span><span class="dev-stat-label">uptime guarantee</span></div>
+        <div class="dev-stat"><span class="dev-stat-num">0</span><span class="dev-stat-label">bugs in this relationship</span></div>
+      </div>
+      <div id="achievements" class="achievements">
+        <p class="achv-title">Hidden Achievements Unlocked</p>
+        <ul id="achv-list" class="achv-list"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===================== 404 HIDDEN LINK ===================== -->
+<section id="notfound-screen" class="screen">
+  <div class="nf-wrap">
+    <div class="nf-code">404</div>
+    <h2 class="nf-title">Perfect Girlfriend Not Found.</h2>
+    <p class="nf-reason">Reason: She's already here.</p>
+    <button class="glow-btn" data-target="home-screen">Return Home (obviously)</button>
+  </div>
+</section>
+
+<!-- ===================== SHUTDOWN ===================== -->
+<section id="shutdown-screen" class="screen">
+  <div class="shutdown-wrap">
+    <div id="shutdown-log" class="shutdown-log"></div>
+  </div>
+</section>
+
+<!-- Toasts for easter eggs -->
+<div id="toast-container" class="toast-container"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
